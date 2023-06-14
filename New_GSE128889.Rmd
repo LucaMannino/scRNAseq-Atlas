@@ -1,0 +1,194 @@
+---
+title: "New_GSE128889"
+output: html_notebook
+---
+
+
+```{r}
+set.seed(001)
+```
+
+```{r, results='hide'}
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(DoubletFinder)
+```
+
+```{r}
+setwd("/home/lucamannino/R_Projects/scAtlas/Individual_Studies/GSE128889")
+```
+
+```{r}
+
+# Load the PBMC dataset
+GSE128889 <- Read10X(data.dir = "./GSE128889_RAW")
+# Initialize the Seurat object with the raw (non-normalized data).
+GSE128889
+GSE128889 <- CreateSeuratObject(counts = GSE128889, project = "GSE128889", min.cells = 3, min.features = 200)
+GSE128889
+```
+All data obtained from cellRanger
+33538 genes across 11327 samples
+After cells and genes with low counts are removed
+17293 genes across 11325 samples
+
+
+```{r}
+GSE128889[["mt.percent"]] <-PercentageFeatureSet(GSE128889, pattern = "^MT-")
+
+VlnPlot(GSE128889, features = c("nFeature_RNA", "nCount_RNA", "mt.percent"), ncol = 3)
+```
+
+Proceed to filter cells
+
+
+```{r}
+max.mito.thr_GSE128889 <- median(GSE128889@meta.data$mt.percent) + 4*mad(GSE128889@meta.data$mt.percent)
+```
+
+
+```{r}
+library(ggExtra)
+library(ggplot2)
+p1 <- ggplot(GSE128889@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_GSE128889), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE128889_Filtered@meta.data$mt.percent > max.mito.thr_GSE128889_Filtered)))," cells removed\n",                                        as.numeric(table(GSE128889_Filtered@meta.data$mt.percent > max.mito.thr_GSE128889_Filtered)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p1, type = "histogram", fill="lightgrey", bins=500) 
+```
+
+```{r}
+ggMarginal(ggplot(GSE128889@meta.data, aes(x=nFeature_RNA, y=nCount_RNA))+ geom_point() , type = "histogram", fill="lightgrey", bins=100)
+FeatureScatter(GSE128889, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+ggMarginal(ggplot(GSE128889@meta.data, aes(x=nFeature_RNA, y=nCount_RNA))+ geom_point() , type = "histogram", fill="lightgrey", bins=100)
+```
+
+
+
+
+ proceed to filter out low quality cells
+```{r}
+GSE128889
+GSE128889_Filtered <- subset(GSE128889, subset = nFeature_RNA < 3000  & mt.percent < max.mito.thr_GSE128889 & nCount_RNA < 12500 )
+GSE128889_Filtered
+```
+
+from 18433 features across 11325 samples
+to: 18433 features across 10915 samples
+
+
+
+check linear model after filtering
+```{r}
+lin_mod <- lm(log(GSE128889_Filtered@meta.data$nFeature_RNA) ~ log(GSE128889_Filtered@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE128889_Filtered@meta.data$nCount_RNA),log(GSE128889_Filtered@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE128889_Filtered <- subset(GSE128889_Filtered, cells = tokeep)
+```
+
+```{r}
+GSE128889_Filtered
+```
+18433 features across 10913  cells
+
+
+
+
+
+Nest step remove doublets with doublet finder
+estimated the number of doublets by multiplying the number of total cells sequenced by 0.08 per 1000 cells
+First step is estimate percentage of doublets:
+```{r}
+GSE128889_FilteredDoubletPerc <- 0.008*(11327/1000)
+GSE128889_FilteredDoubletPerc
+```
+DB proportion: 0.090616
+
+```{r}
+GSE128889_Filtered <- GSE128889_Filtered %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE128889_Filtered, ndims = 50)
+
+sweep.res.list_GSE128889_Filtered <- paramSweep_v3(GSE128889_Filtered, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE128889_Filtered <- summarizeSweep(sweep.res.list_GSE128889_Filtered, GT = FALSE)
+bcmvn_GSE128889_Filtered <- find.pK(sweep.stats_GSE128889_Filtered)
+
+GSE128889_Filtered <- FindNeighbors(GSE128889_Filtered, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE128889_Filtered))
+GSE128889_Filtered <- FindClusters(GSE128889_Filtered)
+
+
+homotypic.prop_GSE128889_Filtered <- modelHomotypic(GSE128889_Filtered@meta.data$seurat_clusters)   
+nExp_poi_GSE128889_Filtered <- round(GSE128889_FilteredDoubletPerc*nrow(GSE128889_Filtered@meta.data))
+nExp_poi.adj_GSE128889_Filtered <- round(nExp_poi_GSE128889_Filtered*(1-homotypic.prop_GSE128889_Filtered))
+
+
+pK_GSE128889_Filtered = as.numeric(as.character(bcmvn_GSE128889_Filtered$pK))
+BCmetric_GSE128889_Filtered = bcmvn_GSE128889_Filtered$BCmetric
+pK_choose_GSE128889_Filtered = pK_GSE128889_Filtered[which(BCmetric_GSE128889_Filtered %in% max(BCmetric_GSE128889_Filtered))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE128889_Filtered, y = BCmetric_GSE128889_Filtered, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE128889_Filtered,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE128889_Filtered,max(BCmetric_GSE128889_Filtered),as.character(pK_choose_GSE128889_Filtered),pos = 4,col = "red")
+```
+
+use appropiate pK value as estimated above
+```{r}
+GSE128889_Filtered <- doubletFinder_v3(GSE128889_Filtered, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE128889_Filtered, nExp = nExp_poi.adj_GSE128889_Filtered, reuse.pANN = FALSE, sct = FALSE)
+GSE128889_Filtered
+#
+```
+
+```{r}
+GSE128889_Filtered <- RunUMAP(GSE128889_Filtered, dims = 1:20,reduction = "pca", verbose = FALSE)
+```
+
+```{r}
+DimPlot(GSE128889_Filtered,group.by="DF.classifications_0.25_0.21_838")
+```
+
+
+
+
+```{r}
+GSE128889_Filtered
+GSE128889_Filtered <- subset(GSE128889_Filtered, subset = DF.classifications_0.25_0.21_838 == "Singlet")
+GSE128889_Filtered 
+```
+
+from 18433 genes across 10913 cells
+
+After DB removal 18433 features across 10075 samples 
+
+
+
+```{r}
+head(GSE128889_Filtered)
+```
+
+```{r}
+GSE128889_Filtered$RNA_snn_res.0.8<- NULL
+GSE128889_Filtered$pANN_0.25_0.21_838<- NULL
+GSE128889_Filtered$DF.classifications_0.25_0.21_838<- NULL
+GSE128889_Filtered$Study <- "GSE128889"
+GSE128889_Filtered$Condition <- "Healthy Obese"
+GSE128889_Filtered$sex <- "female"
+GSE128889_Filtered$technology <- "Chromium-v2 single cell"
+```
+
+```{r}
+head(GSE128889_Filtered)
+
+```
+
+```{r}
+saveRDS(GSE128889_Filtered,"New_GSE128889.RDS")
+```
+
