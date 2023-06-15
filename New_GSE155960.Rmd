@@ -1,0 +1,1441 @@
+---
+title: "New_GSE155960"
+output:
+  html_notebook:
+    df_print: paged
+---
+
+#GSE155960 was re aligned to genome reference in order to have matching gene symbols between all datasets, although uses same reference genome conversion with enseble 
+#CD45 negative cells and CD45 positive cells used
+```{r}
+set.seed(001)
+```
+
+```{r, results='hide'}
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(DoubletFinder)
+```
+```{r}
+setwd("/home/lucamannino/R_Projects/scAtlas/Individual_Studies/GSE155960")
+```
+
+```{r, results='hide'}
+# Load the PBMC dataset
+SRR12423009 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423009_count/")
+SRR12423009
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423009 <- CreateSeuratObject(counts = SRR12423009, project = "SRR12423009", min.cells = 3, min.features = 200)
+SRR12423009
+```
+3868 samples with 19966 genes obtained from cell ranger
+After removing cell with less than 200 gene counts:
+19666 features across 3813 samples within 1 assay 
+
+
+
+```{r, results='hide'}
+SRR12423010 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423010_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423010
+SRR12423010 <- CreateSeuratObject(counts = SRR12423010, project = "SRR12423010", min.cells = 3, min.features = 200)
+SRR12423010
+```
+36601 genes with 5904 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+19993 features across 5866 samples within 1 assay 
+
+
+
+```{r, results='hide'}
+SRR12423011 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423011_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423011
+SRR12423011 <- CreateSeuratObject(counts = SRR12423011, project = "SRR12423011", min.cells = 3, min.features = 200)
+SRR12423011
+```
+
+36601 genes with 6357 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+20057 features across 6331 samples within 1 assay 
+
+
+```{r, results='hide'}
+SRR12423012 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423012_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423012
+SRR12423012 <- CreateSeuratObject(counts = SRR12423012, project = "SRR12423012", min.cells = 3, min.features = 200)
+SRR12423012
+```
+
+36601 genes with 6736 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+20728 features across 6691 samples within 1 assay 
+
+
+
+
+```{r, results='hide'}
+SRR12423013 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423013_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423013
+SRR12423013 <- CreateSeuratObject(counts = SRR12423013, project = "SRR12423013", min.cells = 3, min.features = 200)
+SRR12423013
+```
+36601 genes with 3647 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+19404 features across 3589 samples
+```{r, results='hide'}
+SRR12423014 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423014_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423014
+SRR12423014 <- CreateSeuratObject(counts = SRR12423014, project = "SRR12423014", min.cells = 3, min.features = 200)
+SRR12423014
+```
+36601 genes with 7916 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+20595 features across 7872 samples
+
+
+
+```{r, results='hide'}
+SRR12423015 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423015_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423015
+SRR12423015 <- CreateSeuratObject(counts = SRR12423015, project = "SRR12423015", min.cells = 3, min.features = 200)
+SRR12423015
+```
+36601  genes with 12807 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+18681 features across 12804 samples
+
+
+```{r, results='hide'}
+SRR12423016 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423016_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423016
+SRR12423016 <- CreateSeuratObject(counts = SRR12423016, project = "SRR12423016", min.cells = 3, min.features = 200)
+SRR12423016
+```
+
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+20298 features across 8718 samples
+
+
+```{r, results='hide'}
+SRR12423017 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423017_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423017
+SRR12423017 <- CreateSeuratObject(counts = SRR12423017, project = "SRR12423017", min.cells = 3, min.features = 200)
+SRR12423017
+```
+
+36601 genes with 5964 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+19446 features across 5896 samples
+
+```{r, results='hide'}
+SRR12423018 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423018_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423018
+SRR12423018 <- CreateSeuratObject(counts = SRR12423018, project = "SRR12423018", min.cells = 3, min.features = 200)
+SRR12423018
+```
+
+36601  genes with 6613 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+19672 features across 6550 samples
+
+```{r, results='hide'}
+SRR12423019 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423019_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423019
+SRR12423019 <- CreateSeuratObject(counts = SRR12423019, project = "SRR12423019", min.cells = 3, min.features = 200)
+SRR12423019
+```
+
+36601  genes with 6500 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+19236 features across 6429 samples
+
+```{r, results='hide'}
+SRR12423020 <- Read10X(data.dir = "./GSE155960_RAW/SRR12423020_count/")
+# Initialize the Seurat object with the RAW (non-normalized data).
+SRR12423020
+SRR12423020 <- CreateSeuratObject(counts = SRR12423020, project = "SRR12423020", min.cells = 3, min.features = 200)
+SRR12423020
+```
+
+36601 genes with 9149 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+20099 features across 9089 samples
+
+
+```{r}
+GSE155960 <- c(SRR12423009,SRR12423010,SRR12423011,SRR12423012,SRR12423013,SRR12423014,SRR12423015,SRR12423016,SRR12423017,SRR12423018,SRR12423019,SRR12423020)
+names(GSE155960) <- c("SRR12423009","SRR12423010","SRR12423011","SRR12423012","SRR12423013","SRR12423014","SRR12423015","SRR12423016","SRR12423017","SRR12423018","SRR12423019","SRR12423020")
+```
+
+```{r}
+
+GSE155960$SRR12423009[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423009, pattern = "^MT-")
+GSE155960$SRR12423010[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423010, pattern = "^MT-")
+GSE155960$SRR12423011[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423011, pattern = "^MT-")
+GSE155960$SRR12423012[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423012, pattern = "^MT-")
+GSE155960$SRR12423013[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423013, pattern = "^MT-")
+GSE155960$SRR12423014[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423014, pattern = "^MT-")
+GSE155960$SRR12423015[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423015, pattern = "^MT-")
+GSE155960$SRR12423016[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423016, pattern = "^MT-")
+GSE155960$SRR12423017[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423017, pattern = "^MT-")
+GSE155960$SRR12423018[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423018, pattern = "^MT-")
+GSE155960$SRR12423019[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423019, pattern = "^MT-")
+GSE155960$SRR12423020[["mt.percent"]] <-PercentageFeatureSet(GSE155960$SRR12423020, pattern = "^MT-")
+
+
+
+```
+```{r}
+lapply(GSE155960, function(x)  {VlnPlot(x, features = c("nFeature_RNA", "nCount_RNA", "mt.percent"), ncol = 3)})
+```
+
+
+```{r}
+
+
+
+
+max.mito.thr_SRR12423009 <- median(GSE155960$SRR12423009@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423009@meta.data$mt.percent)
+max.mito.thr_SRR12423010 <- median(GSE155960$SRR12423010@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423010@meta.data$mt.percent)
+max.mito.thr_SRR12423011 <- median(GSE155960$SRR12423011@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423011@meta.data$mt.percent)
+
+max.mito.thr_SRR12423012 <- median(GSE155960$SRR12423012@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423012@meta.data$mt.percent)
+max.mito.thr_SRR12423013 <- median(GSE155960$SRR12423013@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423013@meta.data$mt.percent)
+max.mito.thr_SRR12423014 <- median(GSE155960$SRR12423014@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423014@meta.data$mt.percent)
+
+max.mito.thr_SRR12423015 <- median(GSE155960$SRR12423015@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423015@meta.data$mt.percent)
+max.mito.thr_SRR12423016 <- median(GSE155960$SRR12423016@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423016@meta.data$mt.percent)
+max.mito.thr_SRR12423017 <- median(GSE155960$SRR12423017@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423017@meta.data$mt.percent)
+
+max.mito.thr_SRR12423018 <- median(GSE155960$SRR12423018@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423018@meta.data$mt.percent)
+max.mito.thr_SRR12423019 <- median(GSE155960$SRR12423019@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423019@meta.data$mt.percent)
+max.mito.thr_SRR12423020 <- median(GSE155960$SRR12423020@meta.data$mt.percent) + 4*mad(GSE155960$SRR12423020@meta.data$mt.percent)
+max.mito.thr_SRR12423009
+max.mito.thr_SRR12423010
+max.mito.thr_SRR12423011
+max.mito.thr_SRR12423012
+max.mito.thr_SRR12423013
+max.mito.thr_SRR12423014
+max.mito.thr_SRR12423015
+max.mito.thr_SRR12423016
+max.mito.thr_SRR12423017
+max.mito.thr_SRR12423018
+max.mito.thr_SRR12423019
+max.mito.thr_SRR12423020
+
+```
+[1] 10.13848
+[1] 7.520681
+[1] 7.415243
+[1] 8.828925
+[1] 10.00873
+[1] 7.944421
+[1] 9.471972
+[1] 15.44265
+[1] 16.76467
+[1] 15.9268
+[1] 14.16421
+[1] 17.61465
+
+
+```{r}
+library(ggExtra)
+library(ggplot2)
+p1 <- ggplot(GSE155960$SRR12423009@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423009), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p1, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+```{r}
+p2 <- ggplot(GSE155960$SRR12423010@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423010), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p2, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+
+```{r}
+p3 <- ggplot(GSE155960$SRR12423011@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423011), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p3, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+
+```{r}
+p4 <- ggplot(GSE155960$SRR12423012@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept =max.mito.thr_SRR12423012), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p4, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+
+```{r}
+p5 <- ggplot(GSE155960$SRR12423013@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423013), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p5, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+
+
+```{r}
+p6 <- ggplot(GSE155960$SRR12423014@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423014), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p6, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+```{r}
+p7 <- ggplot(GSE155960$SRR12423015@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423015), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p7, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+```{r}
+p8 <- ggplot(GSE155960$SRR12423016@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423016), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p8, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+```{r}
+p9 <- ggplot(GSE155960$SRR12423017@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423017), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p9, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+```{r}
+p10 <- ggplot(GSE155960$SRR12423018@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423018), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p10, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+```{r}
+p11 <- ggplot(GSE155960$SRR12423019@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423019), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p11, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+```{r}
+p12 <- ggplot(GSE155960$SRR12423020@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_SRR12423020), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE155960$SRR12423009@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p12, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+Following plots used to choose maximum nCount and maximumnFeature_RNA to remove outliers this step also heps getting rid of multiplets
+
+```{r}
+
+lapply(GSE155960, function(x)  {FeatureScatter(x, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")})
+lapply(GSE155960, function(x)  {ggMarginal(ggplot(x@meta.data, aes(x=nFeature_RNA, y=nCount_RNA))+ geom_point() , type = "histogram", fill="lightgrey", bins=100)})
+```
+High mitocondrial removed as those are probably dying cells plus filtered the high counts and high features outliers as they are more likely to be doublets
+
+```{r}
+
+GSE155960$SRR12423009 <- subset(GSE155960$SRR12423009, subset = nFeature_RNA < 3750 & mt.percent < max.mito.thr_SRR12423009  & nCount_RNA < 15000 )
+
+GSE155960$SRR12423010 <- subset(GSE155960$SRR12423010, subset = nFeature_RNA < 4100 & mt.percent < max.mito.thr_SRR12423010  & nCount_RNA < 16000 )
+
+GSE155960$SRR12423011 <- subset(GSE155960$SRR12423011, subset = nFeature_RNA < 4000 & mt.percent < max.mito.thr_SRR12423011 & nCount_RNA < 17500 )
+
+GSE155960$SRR12423012 <- subset(GSE155960$SRR12423012, subset = nFeature_RNA < 4500 & mt.percent < max.mito.thr_SRR12423012 & nCount_RNA < 20000 )
+
+GSE155960$SRR12423013 <- subset(GSE155960$SRR12423013, subset = nFeature_RNA < 4000 & mt.percent < max.mito.thr_SRR12423013 & nCount_RNA < 16000 )
+
+GSE155960$SRR12423014 <- subset(GSE155960$SRR12423014, subset = nFeature_RNA < 4250 & mt.percent < max.mito.thr_SRR12423014  & nCount_RNA < 18000 )
+
+
+GSE155960$SRR12423015 <- subset(GSE155960$SRR12423015, subset = nFeature_RNA < 2800 & mt.percent < max.mito.thr_SRR12423015  & nCount_RNA < 12500 )
+
+
+GSE155960$SRR12423016 <- subset(GSE155960$SRR12423016, subset = nFeature_RNA < 4000 & mt.percent < max.mito.thr_SRR12423016  & nCount_RNA < 20000 )
+
+
+GSE155960$SRR12423017 <- subset(GSE155960$SRR12423017, subset = nFeature_RNA < 3900 & mt.percent < max.mito.thr_SRR12423017  & nCount_RNA < 20000 )
+
+
+GSE155960$SRR12423018 <- subset(GSE155960$SRR12423018, subset = nFeature_RNA < 4100 & mt.percent < max.mito.thr_SRR12423018  & nCount_RNA < 25000 )
+
+
+GSE155960$SRR12423019 <- subset(GSE155960$SRR12423019, subset = nFeature_RNA < 3500 & mt.percent < max.mito.thr_SRR12423019  & nCount_RNA < 20000 )
+
+
+GSE155960$SRR12423020 <- subset(GSE155960$SRR12423020, subset = nFeature_RNA < 3900 & mt.percent < max.mito.thr_SRR12423020  & nCount_RNA < 20000 )
+
+
+```
+
+```{r, results='hide'}
+GSE155960$SRR12423009
+GSE155960$SRR12423010
+GSE155960$SRR12423011
+GSE155960$SRR12423012
+GSE155960$SRR12423013
+GSE155960$SRR12423014
+GSE155960$SRR12423015
+GSE155960$SRR12423016
+GSE155960$SRR12423017
+GSE155960$SRR12423018
+GSE155960$SRR12423019
+GSE155960$SRR12423020
+
+```
+
+SRR12423009 19666 features across 3549 samples
+SRR12423010 19993 features across 5583 samples
+SRR12423011 20057 features across 6058 samples
+SRR12423012 20728 features across 6413 samples
+SRR12423013 19404 features across 3381 samples
+SRR12423014 20595 features across 7530 samples
+SRR12423015 18681 features across 12189 samples
+SRR12423016 20298 features across 8335 samples
+SRR12423017 19446 features across 5587 samples
+SRR12423018 19672 features across 6194 samples
+SRR12423019 19236 features across 6106 samples
+SRR12423020 20099 features across 8738 samples
+
+```{r}
+
+lin_mod <- lm(log(GSE155960$SRR12423009@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423009@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423009@meta.data$nCount_RNA),log(GSE155960$SRR12423009@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423009 <- subset(GSE155960$SRR12423009, cells = tokeep)
+```
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423010@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423010@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423010@meta.data$nCount_RNA),log(GSE155960$SRR12423010@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423010 <- subset(GSE155960$SRR12423010, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423011@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423011@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423011@meta.data$nCount_RNA),log(GSE155960$SRR12423011@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423011 <- subset(GSE155960$SRR12423011, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423012@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423012@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423012@meta.data$nCount_RNA),log(GSE155960$SRR12423012@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423012 <- subset(GSE155960$SRR12423012, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423013@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423013@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423013@meta.data$nCount_RNA),log(GSE155960$SRR12423013@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423013 <- subset(GSE155960$SRR12423013, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423014@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423014@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423014@meta.data$nCount_RNA),log(GSE155960$SRR12423014@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423014 <- subset(GSE155960$SRR12423014, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423015@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423015@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423015@meta.data$nCount_RNA),log(GSE155960$SRR12423015@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423015 <- subset(GSE155960$SRR12423015, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423016@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423016@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423016@meta.data$nCount_RNA),log(GSE155960$SRR12423016@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423016 <- subset(GSE155960$SRR12423016, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423017@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423017@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423017@meta.data$nCount_RNA),log(GSE155960$SRR12423017@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423017 <- subset(GSE155960$SRR12423017, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423018@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423018@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423018@meta.data$nCount_RNA),log(GSE155960$SRR12423018@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423018 <- subset(GSE155960$SRR12423018, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423019@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423019@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423019@meta.data$nCount_RNA),log(GSE155960$SRR12423019@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423019 <- subset(GSE155960$SRR12423019, cells = tokeep)
+```
+
+```{r}
+lin_mod <- lm(log(GSE155960$SRR12423020@meta.data$nFeature_RNA) ~ log(GSE155960$SRR12423020@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE155960$SRR12423020@meta.data$nCount_RNA),log(GSE155960$SRR12423020@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE155960$SRR12423020 <- subset(GSE155960$SRR12423020, cells = tokeep)
+```
+
+
+
+
+```{r, results='hide'}
+GSE155960$SRR12423009
+GSE155960$SRR12423010
+GSE155960$SRR12423011
+GSE155960$SRR12423012
+GSE155960$SRR12423013
+GSE155960$SRR12423014
+GSE155960$SRR12423015
+GSE155960$SRR12423016
+GSE155960$SRR12423017
+GSE155960$SRR12423018
+GSE155960$SRR12423019
+GSE155960$SRR12423020
+```
+
+SRR12423009 19666 features across 3549 samples
+SRR12423010 19993 features across 5580 samples
+SRR12423011 20057 features across 6053 samples
+SRR12423012 20728 features across 6404 samples
+SRR12423013 19404 features across 3379 samples
+SRR12423014 20595 features across 7529 samples
+SRR12423015 18681 features across 12189 samples
+SRR12423016 20298 features across 8326 samples
+SRR12423017 19446 features across 5586 samples
+SRR12423018 19672 features across 6188 samples
+SRR12423019 19236 features across 6104 samples
+SRR12423020 20099 features across 8732 samples
+
+
+Nest step remove doublets with doublet finder
+estimated the number of doublets by multiplying the number of total cells sequenced by 0.08 per 1000 cells
+First step is estimate percentage of doublets:
+```{r}
+SRR12423009DoubletPerc <- 0.008*(3868/1000)
+SRR12423009DoubletPerc
+```
+3.0944%
+
+```{r}
+GSE155960$SRR12423009 <- GSE155960$SRR12423009 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423009, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423009 <- paramSweep_v3(GSE155960$SRR12423009, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423009 <- summarizeSweep(sweep.res.list_GSE155960SRR12423009, GT = FALSE)
+bcmvn_GSE155960SRR12423009 <- find.pK(sweep.stats_GSE155960SRR12423009)
+
+GSE155960$SRR12423009 <- FindNeighbors(GSE155960$SRR12423009, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423009))
+GSE155960$SRR12423009 <- FindClusters(GSE155960$SRR12423009)
+
+
+homotypic.prop_GSE155960SRR12423009 <- modelHomotypic(GSE155960$SRR12423009@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423009 <- round(SRR12423009DoubletPerc*nrow(GSE155960$SRR12423009@meta.data))
+nExp_poi.adj_GSE155960SRR12423009 <- round(nExp_poi_GSE155960SRR12423009*(1-homotypic.prop_GSE155960SRR12423009))
+
+
+pK_GSE155960SRR12423009 = as.numeric(as.character(bcmvn_GSE155960SRR12423009$pK))
+BCmetric_GSE155960SRR12423009 = bcmvn_GSE155960SRR12423009$BCmetric
+pK_choose_GSE155960SRR12423009 = pK_GSE155960SRR12423009[which(BCmetric_GSE155960SRR12423009 %in% max(BCmetric_GSE155960SRR12423009))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423009, y = BCmetric_GSE155960SRR12423009, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423009,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423009,max(BCmetric_GSE155960SRR12423009),as.character(pK_choose_GSE155960SRR12423009),pos = 4,col = "red")
+```
+
+use appropiate pK value as estimated above
+```{r}
+GSE155960$SRR12423009 <- doubletFinder_v3(GSE155960$SRR12423009, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423009, nExp = nExp_poi.adj_GSE155960SRR12423009, reuse.pANN = FALSE, sct = FALSE)
+
+#
+```
+```{r}
+GSE155960$SRR12423009 <- RunUMAP(GSE155960$SRR12423009, dims = 1:20,reduction = "pca", verbose = FALSE)
+```
+
+```{r}
+DimPlot(GSE155960$SRR12423009,group.by="DF.classifications_0.25_0.15_94")
+```
+
+
+
+
+```{r}
+GSE155960$SRR12423009
+GSE155960$SRR12423009 <- subset(GSE155960$SRR12423009, subset = DF.classifications_0.25_0.15_94 == "Singlet")
+GSE155960$SRR12423009 
+```
+Old Object:
+19666 features across 3549
+Doublet removed new object:
+19666 features across 3455
+
+```{r}
+SRR12423010
+GSE155960$SRR12423010
+```
+
+```{r}
+SRR12423010Doubletpercentage <- (5904/1000)*0.008
+SRR12423010Doubletpercentage
+```
+0.047232 doublet proportion
+```{r}
+GSE155960$SRR12423010 <- GSE155960$SRR12423010 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423010, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423010 <- paramSweep_v3(GSE155960$SRR12423010, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423010 <- summarizeSweep(sweep.res.list_GSE155960SRR12423010, GT = FALSE)
+bcmvn_GSE155960SRR12423010 <- find.pK(sweep.stats_GSE155960SRR12423010)
+
+GSE155960$SRR12423010 <- FindNeighbors(GSE155960$SRR12423010, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423010))
+GSE155960$SRR12423010 <- FindClusters(GSE155960$SRR12423010)
+
+
+homotypic.prop_GSE155960SRR12423010 <- modelHomotypic(GSE155960$SRR12423010@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423010 <- round(SRR12423010Doubletpercentage*nrow(GSE155960$SRR12423010@meta.data))
+nExp_poi.adj_GSE155960SRR12423010 <- round(nExp_poi_GSE155960SRR12423010*(1-homotypic.prop_GSE155960SRR12423010))
+
+
+pK_GSE155960SRR12423010 = as.numeric(as.character(bcmvn_GSE155960SRR12423010$pK))
+BCmetric_GSE155960SRR12423010 = bcmvn_GSE155960SRR12423010$BCmetric
+pK_choose_GSE155960SRR12423010 = pK_GSE155960SRR12423010[which(BCmetric_GSE155960SRR12423010 %in% max(BCmetric_GSE155960SRR12423010))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423010, y = BCmetric_GSE155960SRR12423010, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423010,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423010,max(BCmetric_GSE155960SRR12423010),as.character(pK_choose_GSE155960SRR12423010),pos = 4,col = "red")
+
+GSE155960$SRR12423010 <- doubletFinder_v3(GSE155960$SRR12423010, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423010, nExp = nExp_poi.adj_GSE155960SRR12423010, reuse.pANN = FALSE, sct = FALSE)
+```
+```{r}
+GSE155960$SRR12423010 <- RunUMAP(GSE155960$SRR12423010,dims = 1:20)
+DimPlot(GSE155960$SRR12423010, group.by = "DF.classifications_0.25_0.29_219")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423010
+GSE155960$SRR12423010 <- subset(GSE155960$SRR12423010, subset = DF.classifications_0.25_0.29_219 == "Singlet")
+
+GSE155960$SRR12423010
+```
+
+Before Doublet Removal
+19993 features across 5580 samples
+After Doublet Removal:
+19993 features across 5361 samples 
+
+
+
+
+```{r}
+SRR12423011
+GSE155960$SRR12423011
+```
+```{r}
+SRR12423011DBpercentage <- (6357/1000)*0.008
+SRR12423011DBpercentage
+```
+0.050856 Doublet proportion
+```{r}
+GSE155960$SRR12423011 <- GSE155960$SRR12423011 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423011, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423011 <- paramSweep_v3(GSE155960$SRR12423011, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423011 <- summarizeSweep(sweep.res.list_GSE155960SRR12423011, GT = FALSE)
+bcmvn_GSE155960SRR12423011 <- find.pK(sweep.stats_GSE155960SRR12423011)
+
+GSE155960$SRR12423011 <- FindNeighbors(GSE155960$SRR12423011, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423011))
+GSE155960$SRR12423011 <- FindClusters(GSE155960$SRR12423011)
+
+
+homotypic.prop_GSE155960SRR12423011 <- modelHomotypic(GSE155960$SRR12423011@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423011 <- round(SRR12423011DBpercentage*nrow(GSE155960$SRR12423011@meta.data))
+nExp_poi.adj_GSE155960SRR12423011 <- round(nExp_poi_GSE155960SRR12423011*(1-homotypic.prop_GSE155960SRR12423011))
+
+
+pK_GSE155960SRR12423011 = as.numeric(as.character(bcmvn_GSE155960SRR12423011$pK))
+BCmetric_GSE155960SRR12423011 = bcmvn_GSE155960SRR12423011$BCmetric
+pK_choose_GSE155960SRR12423011 = pK_GSE155960SRR12423011[which(BCmetric_GSE155960SRR12423011 %in% max(BCmetric_GSE155960SRR12423011))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423011, y = BCmetric_GSE155960SRR12423011, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423011,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423011,max(BCmetric_GSE155960SRR12423011),as.character(pK_choose_GSE155960SRR12423011),pos = 4,col = "red")
+
+GSE155960$SRR12423011 <- doubletFinder_v3(GSE155960$SRR12423011, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423011, nExp = nExp_poi.adj_GSE155960SRR12423011, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423011 <- RunUMAP(GSE155960$SRR12423011,dims = 1:20)
+DimPlot(GSE155960$SRR12423011, group.by = "DF.classifications_0.25_0.16_259")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423011
+GSE155960$SRR12423011 <- subset(GSE155960$SRR12423011, subset = DF.classifications_0.25_0.16_259 == "Singlet")
+
+GSE155960$SRR12423011
+```
+Before Doublet Removal
+20057 features across 6053 samples
+After Doublet Removal:
+20057 features across 5794 samples
+
+
+```{r}
+SRR12423012DBpercentage <- (6736/1000)*0.008
+SRR12423012DBpercentage
+```
+DB proprotion 0.05388
+```{r}
+GSE155960$SRR12423012 <- GSE155960$SRR12423012 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423012, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423012 <- paramSweep_v3(GSE155960$SRR12423012, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423012 <- summarizeSweep(sweep.res.list_GSE155960SRR12423012, GT = FALSE)
+bcmvn_GSE155960SRR12423012 <- find.pK(sweep.stats_GSE155960SRR12423012)
+
+GSE155960$SRR12423012 <- FindNeighbors(GSE155960$SRR12423012, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423012))
+GSE155960$SRR12423012 <- FindClusters(GSE155960$SRR12423012)
+
+
+homotypic.prop_GSE155960SRR12423012 <- modelHomotypic(GSE155960$SRR12423012@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423012 <- round(SRR12423012DBpercentage*nrow(GSE155960$SRR12423012@meta.data))
+nExp_poi.adj_GSE155960SRR12423012 <- round(nExp_poi_GSE155960SRR12423012*(1-homotypic.prop_GSE155960SRR12423012))
+
+
+pK_GSE155960SRR12423012 = as.numeric(as.character(bcmvn_GSE155960SRR12423012$pK))
+BCmetric_GSE155960SRR12423012 = bcmvn_GSE155960SRR12423012$BCmetric
+pK_choose_GSE155960SRR12423012 = pK_GSE155960SRR12423012[which(BCmetric_GSE155960SRR12423012 %in% max(BCmetric_GSE155960SRR12423012))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423012, y = BCmetric_GSE155960SRR12423012, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423012,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423012,max(BCmetric_GSE155960SRR12423012),as.character(pK_choose_GSE155960SRR12423012),pos = 4,col = "red")
+
+GSE155960$SRR12423012 <- doubletFinder_v3(GSE155960$SRR12423012, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423012, nExp = nExp_poi.adj_GSE155960SRR12423012, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423012 <- RunUMAP(GSE155960$SRR12423012,dims = 1:20)
+DimPlot(GSE155960$SRR12423012, group.by = "DF.classifications_0.25_0.15_295")
+``` 
+
+
+
+
+```{r}
+#
+GSE155960$SRR12423012
+GSE155960$SRR12423012 <- subset(GSE155960$SRR12423012, subset = DF.classifications_0.25_0.15_295 == "Singlet")
+
+GSE155960$SRR12423012
+```
+Before DB removal: 20728 features across 6404 samples
+After DB removal: 20728 features across 6109 samples
+
+
+
+
+
+```{r}
+SRR12423013DBpercentage <- (3647/1000)*0.008
+SRR12423013DBpercentage
+```
+0.029176 Doublet proportion
+```{r}
+GSE155960$SRR12423013 <- GSE155960$SRR12423013 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423013, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423013 <- paramSweep_v3(GSE155960$SRR12423013, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423013 <- summarizeSweep(sweep.res.list_GSE155960SRR12423013, GT = FALSE)
+bcmvn_GSE155960SRR12423013 <- find.pK(sweep.stats_GSE155960SRR12423013)
+
+GSE155960$SRR12423013 <- FindNeighbors(GSE155960$SRR12423013, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423013))
+GSE155960$SRR12423013 <- FindClusters(GSE155960$SRR12423013)
+
+
+homotypic.prop_GSE155960SRR12423013 <- modelHomotypic(GSE155960$SRR12423013@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423013 <- round(SRR12423013DBpercentage*nrow(GSE155960$SRR12423013@meta.data))
+nExp_poi.adj_GSE155960SRR12423013 <- round(nExp_poi_GSE155960SRR12423013*(1-homotypic.prop_GSE155960SRR12423013))
+
+
+pK_GSE155960SRR12423013 = as.numeric(as.character(bcmvn_GSE155960SRR12423013$pK))
+BCmetric_GSE155960SRR12423013 = bcmvn_GSE155960SRR12423013$BCmetric
+pK_choose_GSE155960SRR12423013 = pK_GSE155960SRR12423013[which(BCmetric_GSE155960SRR12423013 %in% max(BCmetric_GSE155960SRR12423013))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423013, y = BCmetric_GSE155960SRR12423013, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423013,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423013,max(BCmetric_GSE155960SRR12423013),as.character(pK_choose_GSE155960SRR12423013),pos = 4,col = "red")
+
+GSE155960$SRR12423013 <- doubletFinder_v3(GSE155960$SRR12423013, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423013, nExp = nExp_poi.adj_GSE155960SRR12423013, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423013 <- RunUMAP(GSE155960$SRR12423013,dims = 1:20)
+DimPlot(GSE155960$SRR12423013, group.by = "DF.classifications_0.25_0.13_84")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423013
+GSE155960$SRR12423013 <- subset(GSE155960$SRR12423013, subset = DF.classifications_0.25_0.13_84 == "Singlet")
+
+GSE155960$SRR12423013
+```
+Before Db removal: 19404 features across 3379 samples
+
+After Db removal: 19404 features across 3295 samples
+
+
+
+
+
+
+```{r}
+SRR12423014DBpercentage <- (7916/1000)*0.008
+SRR12423014DBpercentage
+```
+DB proportion: 0.063328
+
+
+```{r}
+GSE155960$SRR12423014 <- GSE155960$SRR12423014 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423014, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423014 <- paramSweep_v3(GSE155960$SRR12423014, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423014 <- summarizeSweep(sweep.res.list_GSE155960SRR12423014, GT = FALSE)
+bcmvn_GSE155960SRR12423014 <- find.pK(sweep.stats_GSE155960SRR12423014)
+
+GSE155960$SRR12423014 <- FindNeighbors(GSE155960$SRR12423014, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423014))
+GSE155960$SRR12423014 <- FindClusters(GSE155960$SRR12423014)
+
+
+homotypic.prop_GSE155960SRR12423014 <- modelHomotypic(GSE155960$SRR12423014@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423014 <- round(SRR12423014DBpercentage*nrow(GSE155960$SRR12423014@meta.data))
+nExp_poi.adj_GSE155960SRR12423014 <- round(nExp_poi_GSE155960SRR12423014*(1-homotypic.prop_GSE155960SRR12423014))
+
+
+pK_GSE155960SRR12423014 = as.numeric(as.character(bcmvn_GSE155960SRR12423014$pK))
+BCmetric_GSE155960SRR12423014 = bcmvn_GSE155960SRR12423014$BCmetric
+pK_choose_GSE155960SRR12423014 = pK_GSE155960SRR12423014[which(BCmetric_GSE155960SRR12423014 %in% max(BCmetric_GSE155960SRR12423014))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423014, y = BCmetric_GSE155960SRR12423014, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423014,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423014,max(BCmetric_GSE155960SRR12423014),as.character(pK_choose_GSE155960SRR12423014),pos = 4,col = "red")
+
+GSE155960$SRR12423014 <- doubletFinder_v3(GSE155960$SRR12423014, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423014, nExp = nExp_poi.adj_GSE155960SRR12423014, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423014 <- RunUMAP(GSE155960$SRR12423014,dims = 1:20)
+DimPlot(GSE155960$SRR12423014, group.by = "DF.classifications_0.25_0.18_406")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423014
+GSE155960$SRR12423014 <- subset(GSE155960$SRR12423014, subset = DF.classifications_0.25_0.18_406 == "Singlet")
+
+GSE155960$SRR12423014
+```
+
+Before doublet removal 20595 features across 7529 samples 
+After DB removal 20595 features across 7123
+
+
+
+
+
+
+
+```{r}
+SRR12423015DBpercentage <- (12807/1000)*0.008
+SRR12423015DBpercentage
+```
+DB proportion: 0.102456
+
+
+```{r}
+GSE155960$SRR12423015 <- GSE155960$SRR12423015 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423015, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423015 <- paramSweep_v3(GSE155960$SRR12423015, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423015 <- summarizeSweep(sweep.res.list_GSE155960SRR12423015, GT = FALSE)
+bcmvn_GSE155960SRR12423015 <- find.pK(sweep.stats_GSE155960SRR12423015)
+
+GSE155960$SRR12423015 <- FindNeighbors(GSE155960$SRR12423015, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423015))
+GSE155960$SRR12423015 <- FindClusters(GSE155960$SRR12423015)
+
+
+homotypic.prop_GSE155960SRR12423015 <- modelHomotypic(GSE155960$SRR12423015@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423015 <- round(SRR12423015DBpercentage*nrow(GSE155960$SRR12423015@meta.data))
+nExp_poi.adj_GSE155960SRR12423015 <- round(nExp_poi_GSE155960SRR12423015*(1-homotypic.prop_GSE155960SRR12423015))
+
+
+pK_GSE155960SRR12423015 = as.numeric(as.character(bcmvn_GSE155960SRR12423015$pK))
+BCmetric_GSE155960SRR12423015 = bcmvn_GSE155960SRR12423015$BCmetric
+pK_choose_GSE155960SRR12423015 = pK_GSE155960SRR12423015[which(BCmetric_GSE155960SRR12423015 %in% max(BCmetric_GSE155960SRR12423015))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423015, y = BCmetric_GSE155960SRR12423015, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423015,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423015,max(BCmetric_GSE155960SRR12423015),as.character(pK_choose_GSE155960SRR12423015),pos = 4,col = "red")
+
+GSE155960$SRR12423015 <- doubletFinder_v3(GSE155960$SRR12423015, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423015, nExp = nExp_poi.adj_GSE155960SRR12423015, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423015 <- RunUMAP(GSE155960$SRR12423015,dims = 1:20)
+DimPlot(GSE155960$SRR12423015, group.by = "DF.classifications_0.25_0.26_1103")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423015
+GSE155960$SRR12423015 <- subset(GSE155960$SRR12423015, subset = DF.classifications_0.25_0.26_1103 == "Singlet")
+
+GSE155960$SRR12423015
+```
+
+Before doublet removal 18681 features across 12189 samples
+After DB removal 8681 features across 11086 samples
+
+
+
+
+
+
+
+
+```{r}
+SRR12423016DBpercentage <- (8718/1000)*0.008
+SRR12423016DBpercentage
+```
+DB proportion: 0.069744
+
+
+```{r}
+GSE155960$SRR12423016 <- GSE155960$SRR12423016 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423016, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423016 <- paramSweep_v3(GSE155960$SRR12423016, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423016 <- summarizeSweep(sweep.res.list_GSE155960SRR12423016, GT = FALSE)
+bcmvn_GSE155960SRR12423016 <- find.pK(sweep.stats_GSE155960SRR12423016)
+
+GSE155960$SRR12423016 <- FindNeighbors(GSE155960$SRR12423016, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423016))
+GSE155960$SRR12423016 <- FindClusters(GSE155960$SRR12423016)
+
+
+homotypic.prop_GSE155960SRR12423016 <- modelHomotypic(GSE155960$SRR12423016@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423016 <- round(SRR12423016DBpercentage*nrow(GSE155960$SRR12423016@meta.data))
+nExp_poi.adj_GSE155960SRR12423016 <- round(nExp_poi_GSE155960SRR12423016*(1-homotypic.prop_GSE155960SRR12423016))
+
+
+pK_GSE155960SRR12423016 = as.numeric(as.character(bcmvn_GSE155960SRR12423016$pK))
+BCmetric_GSE155960SRR12423016 = bcmvn_GSE155960SRR12423016$BCmetric
+pK_choose_GSE155960SRR12423016 = pK_GSE155960SRR12423016[which(BCmetric_GSE155960SRR12423016 %in% max(BCmetric_GSE155960SRR12423016))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423016, y = BCmetric_GSE155960SRR12423016, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423016,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423016,max(BCmetric_GSE155960SRR12423016),as.character(pK_choose_GSE155960SRR12423016),pos = 4,col = "red")
+
+GSE155960$SRR12423016 <- doubletFinder_v3(GSE155960$SRR12423016, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423016, nExp = nExp_poi.adj_GSE155960SRR12423016, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423016 <- RunUMAP(GSE155960$SRR12423016,dims = 1:20)
+DimPlot(GSE155960$SRR12423016, group.by = "DF.classifications_0.25_0.3_528")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423016
+GSE155960$SRR12423016 <- subset(GSE155960$SRR12423016, subset = DF.classifications_0.25_0.3_528 == "Singlet")
+
+GSE155960$SRR12423016
+```
+
+Before doublet removal 20298 features across 8326 samples
+After DB removal 20298 features across 7798 samples
+
+
+
+
+
+
+
+
+```{r}
+SRR12423017DBpercentage <- (5964/1000)*0.008
+SRR12423017DBpercentage
+```
+DB proportion: 0.047712
+
+
+```{r}
+GSE155960$SRR12423017 <- GSE155960$SRR12423017 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423017, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423017 <- paramSweep_v3(GSE155960$SRR12423017, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423017 <- summarizeSweep(sweep.res.list_GSE155960SRR12423017, GT = FALSE)
+bcmvn_GSE155960SRR12423017 <- find.pK(sweep.stats_GSE155960SRR12423017)
+
+GSE155960$SRR12423017 <- FindNeighbors(GSE155960$SRR12423017, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423017))
+GSE155960$SRR12423017 <- FindClusters(GSE155960$SRR12423017)
+
+
+homotypic.prop_GSE155960SRR12423017 <- modelHomotypic(GSE155960$SRR12423017@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423017 <- round(SRR12423017DBpercentage*nrow(GSE155960$SRR12423017@meta.data))
+nExp_poi.adj_GSE155960SRR12423017 <- round(nExp_poi_GSE155960SRR12423017*(1-homotypic.prop_GSE155960SRR12423017))
+
+
+pK_GSE155960SRR12423017 = as.numeric(as.character(bcmvn_GSE155960SRR12423017$pK))
+BCmetric_GSE155960SRR12423017 = bcmvn_GSE155960SRR12423017$BCmetric
+pK_choose_GSE155960SRR12423017 = pK_GSE155960SRR12423017[which(BCmetric_GSE155960SRR12423017 %in% max(BCmetric_GSE155960SRR12423017))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423017, y = BCmetric_GSE155960SRR12423017, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423017,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423017,max(BCmetric_GSE155960SRR12423017),as.character(pK_choose_GSE155960SRR12423017),pos = 4,col = "red")
+
+GSE155960$SRR12423017 <- doubletFinder_v3(GSE155960$SRR12423017, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423017, nExp = nExp_poi.adj_GSE155960SRR12423017, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423017 <- RunUMAP(GSE155960$SRR12423017,dims = 1:20)
+DimPlot(GSE155960$SRR12423017, group.by = "DF.classifications_0.25_0.15_241")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423017
+GSE155960$SRR12423017 <- subset(GSE155960$SRR12423017, subset = DF.classifications_0.25_0.15_241 == "Singlet")
+
+GSE155960$SRR12423017
+```
+
+Before doublet removal 19446 features across 5586 samples  
+After DB removal19446 features across 5345 samples
+
+
+
+
+
+
+
+
+```{r}
+SRR12423018DBpercentage <- (6613/1000)*0.008
+SRR12423018DBpercentage
+```
+DB proportion: 0.063328
+
+
+```{r}
+GSE155960$SRR12423018 <- GSE155960$SRR12423018 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423018, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423018 <- paramSweep_v3(GSE155960$SRR12423018, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423018 <- summarizeSweep(sweep.res.list_GSE155960SRR12423018, GT = FALSE)
+bcmvn_GSE155960SRR12423018 <- find.pK(sweep.stats_GSE155960SRR12423018)
+
+GSE155960$SRR12423018 <- FindNeighbors(GSE155960$SRR12423018, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423018))
+GSE155960$SRR12423018 <- FindClusters(GSE155960$SRR12423018)
+
+
+homotypic.prop_GSE155960SRR12423018 <- modelHomotypic(GSE155960$SRR12423018@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423018 <- round(SRR12423018DBpercentage*nrow(GSE155960$SRR12423018@meta.data))
+nExp_poi.adj_GSE155960SRR12423018 <- round(nExp_poi_GSE155960SRR12423018*(1-homotypic.prop_GSE155960SRR12423018))
+
+
+pK_GSE155960SRR12423018 = as.numeric(as.character(bcmvn_GSE155960SRR12423018$pK))
+BCmetric_GSE155960SRR12423018 = bcmvn_GSE155960SRR12423018$BCmetric
+pK_choose_GSE155960SRR12423018 = pK_GSE155960SRR12423018[which(BCmetric_GSE155960SRR12423018 %in% max(BCmetric_GSE155960SRR12423018))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423018, y = BCmetric_GSE155960SRR12423018, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423018,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423018,max(BCmetric_GSE155960SRR12423018),as.character(pK_choose_GSE155960SRR12423018),pos = 4,col = "red")
+
+GSE155960$SRR12423018 <- doubletFinder_v3(GSE155960$SRR12423018, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423018, nExp = nExp_poi.adj_GSE155960SRR12423018, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423018 <- RunUMAP(GSE155960$SRR12423018,dims = 1:20)
+DimPlot(GSE155960$SRR12423018, group.by = "DF.classifications_0.25_0.06_297")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423018
+GSE155960$SRR12423018 <- subset(GSE155960$SRR12423018, subset = DF.classifications_0.25_0.06_297 == "Singlet")
+
+GSE155960$SRR12423018
+```
+
+Before doublet removal 19672 features across 6188 samples 
+After DB removal 19672 features across 5891 samples
+
+
+
+
+
+
+
+
+```{r}
+SRR12423019DBpercentage <- (6500/1000)*0.008
+SRR12423019DBpercentage
+```
+DB proportion: 0.052
+
+
+```{r}
+GSE155960$SRR12423019 <- GSE155960$SRR12423019 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423019, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423019 <- paramSweep_v3(GSE155960$SRR12423019, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423019 <- summarizeSweep(sweep.res.list_GSE155960SRR12423019, GT = FALSE)
+bcmvn_GSE155960SRR12423019 <- find.pK(sweep.stats_GSE155960SRR12423019)
+
+GSE155960$SRR12423019 <- FindNeighbors(GSE155960$SRR12423019, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423019))
+GSE155960$SRR12423019 <- FindClusters(GSE155960$SRR12423019)
+
+
+homotypic.prop_GSE155960SRR12423019 <- modelHomotypic(GSE155960$SRR12423019@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423019 <- round(SRR12423019DBpercentage*nrow(GSE155960$SRR12423019@meta.data))
+nExp_poi.adj_GSE155960SRR12423019 <- round(nExp_poi_GSE155960SRR12423019*(1-homotypic.prop_GSE155960SRR12423019))
+
+
+pK_GSE155960SRR12423019 = as.numeric(as.character(bcmvn_GSE155960SRR12423019$pK))
+BCmetric_GSE155960SRR12423019 = bcmvn_GSE155960SRR12423019$BCmetric
+pK_choose_GSE155960SRR12423019 = pK_GSE155960SRR12423019[which(BCmetric_GSE155960SRR12423019 %in% max(BCmetric_GSE155960SRR12423019))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423019, y = BCmetric_GSE155960SRR12423019, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423019,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423019,max(BCmetric_GSE155960SRR12423019),as.character(pK_choose_GSE155960SRR12423019),pos = 4,col = "red")
+
+GSE155960$SRR12423019 <- doubletFinder_v3(GSE155960$SRR12423019, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423019, nExp = nExp_poi.adj_GSE155960SRR12423019, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423019 <- RunUMAP(GSE155960$SRR12423019,dims = 1:20)
+```
+
+
+```{r}
+DimPlot(GSE155960$SRR12423019, group.by = "DF.classifications_0.25_0.29_283")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423019
+GSE155960$SRR12423019 <- subset(GSE155960$SRR12423019, subset = DF.classifications_0.25_0.29_283 == "Singlet")
+
+GSE155960$SRR12423019
+```
+
+Before doublet removal 19236 features across 6104 samples 
+After DB removal 19236 features across 5821 samples
+
+
+
+
+
+
+
+
+```{r}
+SRR12423020DBpercentage <- (9149/1000)*0.008
+SRR12423020DBpercentage
+```
+DB proportion: 0.073192
+
+
+```{r}
+GSE155960$SRR12423020 <- GSE155960$SRR12423020 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE155960$SRR12423020, ndims = 50)
+
+sweep.res.list_GSE155960SRR12423020 <- paramSweep_v3(GSE155960$SRR12423020, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE155960SRR12423020 <- summarizeSweep(sweep.res.list_GSE155960SRR12423020, GT = FALSE)
+bcmvn_GSE155960SRR12423020 <- find.pK(sweep.stats_GSE155960SRR12423020)
+
+GSE155960$SRR12423020 <- FindNeighbors(GSE155960$SRR12423020, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE155960$SRR12423020))
+GSE155960$SRR12423020 <- FindClusters(GSE155960$SRR12423020)
+
+
+homotypic.prop_GSE155960SRR12423020 <- modelHomotypic(GSE155960$SRR12423020@meta.data$seurat_clusters)   
+nExp_poi_GSE155960SRR12423020 <- round(SRR12423020DBpercentage*nrow(GSE155960$SRR12423020@meta.data))
+nExp_poi.adj_GSE155960SRR12423020 <- round(nExp_poi_GSE155960SRR12423020*(1-homotypic.prop_GSE155960SRR12423020))
+
+
+pK_GSE155960SRR12423020 = as.numeric(as.character(bcmvn_GSE155960SRR12423020$pK))
+BCmetric_GSE155960SRR12423020 = bcmvn_GSE155960SRR12423020$BCmetric
+pK_choose_GSE155960SRR12423020 = pK_GSE155960SRR12423020[which(BCmetric_GSE155960SRR12423020 %in% max(BCmetric_GSE155960SRR12423020))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE155960SRR12423020, y = BCmetric_GSE155960SRR12423020, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE155960SRR12423020,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE155960SRR12423020,max(BCmetric_GSE155960SRR12423020),as.character(pK_choose_GSE155960SRR12423020),pos = 4,col = "red")
+
+GSE155960$SRR12423020 <- doubletFinder_v3(GSE155960$SRR12423020, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE155960SRR12423020, nExp = nExp_poi.adj_GSE155960SRR12423020, reuse.pANN = FALSE, sct = FALSE)
+```
+
+```{r}
+GSE155960$SRR12423020 <- RunUMAP(GSE155960$SRR12423020,dims = 1:20)
+```
+
+
+```{r}
+DimPlot(GSE155960$SRR12423020, group.by = "DF.classifications_0.25_0.1_595")
+```
+
+
+```{r}
+#
+GSE155960$SRR12423020
+GSE155960$SRR12423020 <- subset(GSE155960$SRR12423020, subset = DF.classifications_0.25_0.1_595 == "Singlet")
+
+GSE155960$SRR12423020
+```
+
+Before doublet removal 20099 features across 8732 samples 
+After DB removal 20099 features across 8137 samples
+
+
+
+```{r}
+GSE155960$SRR12423009$SRA_Tag <-GSE155960$SRR12423009$orig.ident
+GSE155960$SRR12423010$SRA_Tag <- GSE155960$SRR12423010$orig.ident
+GSE155960$SRR12423011$SRA_Tag <-GSE155960$SRR12423011$orig.ident
+GSE155960$SRR12423012$SRA_Tag <- GSE155960$SRR12423012$orig.ident
+GSE155960$SRR12423013$SRA_Tag <-GSE155960$SRR12423013$orig.ident
+GSE155960$SRR12423014$SRA_Tag <- GSE155960$SRR12423014$orig.ident
+
+GSE155960$SRR12423015$SRA_Tag <- GSE155960$SRR12423015$orig.ident
+GSE155960$SRR12423016$SRA_Tag <-GSE155960$SRR12423016$orig.ident
+GSE155960$SRR12423017$SRA_Tag <-GSE155960$SRR12423017$orig.ident
+GSE155960$SRR12423018$SRA_Tag <-GSE155960$SRR12423018$orig.ident
+GSE155960$SRR12423019$SRA_Tag <- GSE155960$SRR12423019$orig.ident
+GSE155960$SRR12423020$SRA_Tag <- GSE155960$SRR12423020$orig.ident
+```
+```{r}
+GSE155960$SRR12423009$orig.ident <- "L_1"
+GSE155960$SRR12423010$orig.ident <- "L_2"
+GSE155960$SRR12423011$orig.ident <- "L_3"
+GSE155960$SRR12423012$orig.ident <- "O_1"
+GSE155960$SRR12423013$orig.ident <- "O_2"
+GSE155960$SRR12423014$orig.ident <- "O_3"
+
+GSE155960$SRR12423015$orig.ident <- "L_1"
+GSE155960$SRR12423016$orig.ident <- "L_2"
+GSE155960$SRR12423017$orig.ident <- "L_3"
+GSE155960$SRR12423018$orig.ident <- "O_1"
+GSE155960$SRR12423019$orig.ident <- "O_2"
+GSE155960$SRR12423020$orig.ident <- "O_3"
+
+```
+
+```{r}
+GSE155960_merged <- merge(GSE155960$SRR12423009,c(GSE155960$SRR12423010,GSE155960$SRR12423011,GSE155960$SRR12423012,GSE155960$SRR12423013,GSE155960$SRR12423014,GSE155960$SRR12423015,GSE155960$SRR12423016,GSE155960$SRR12423017,GSE155960$SRR12423018,GSE155960$SRR12423019,GSE155960$SRR12423020) )
+```
+
+```{r}
+head(GSE155960_merged)
+```
+```{r}
+table(GSE155960_merged$orig.ident)
+table(GSE155960_merged$SRA_Tag)
+GSE155960_merged
+```
+
+GSE128889_Filtered$Study <- "GSE128889"
+GSE128889_Filtered$Condition <- "Healthy Obese"
+GSE128889_Filtered$sex <- "female"
+GSE128889_Filtered$technology <- "Chromium-v2 single cell"
+```{r}
+GSE155960_merged$RNA_snn_res.0.8 <- NULL
+GSE155960_merged$seurat_clusters <- NULL
+GSE155960_merged$pANN_0.25_0.15_94 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.15_94 <- NULL
+GSE155960_merged$pANN_0.25_0.29_219 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.29_219 <- NULL
+GSE155960_merged$pANN_0.25_0.16_259 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.16_259 <- NULL
+GSE155960_merged$pANN_0.25_0.15_295 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.15_295 <- NULL
+GSE155960_merged$pANN_0.25_0.13_84 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.13_84 <- NULL
+GSE155960_merged$pANN_0.25_0.18_406 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.18_406 <- NULL
+GSE155960_merged$pANN_0.25_0.26_1103 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.26_1103 <- NULL
+GSE155960_merged$pANN_0.25_0.3_528 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.3_528 <- NULL
+GSE155960_merged$pANN_0.25_0.15_241 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.15_241 <- NULL
+GSE155960_merged$pANN_0.25_0.06_297 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.06_297 <- NULL
+GSE155960_merged$pANN_0.25_0.29_283 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.29_283 <- NULL
+GSE155960_merged$pANN_0.25_0.1_595 <- NULL
+GSE155960_merged$DF.classifications_0.25_0.1_595 <- NULL
+
+GSE155960_merged$Study <- "GSE155960"
+GSE155960_merged$technology <- "Chromium-v3 single cell"
+GSE155960_merged$sex <- "female"
+```
+
+```{r}
+head(GSE155960_merged)
+```
+
+```{r}
+GSE155960_merged$Condition <- GSE155960_merged$orig.ident
+GSE155960_merged$Condition <- replace(GSE155960_merged$Condition, GSE155960_merged$Condition %in% c("L_1","L_2","L_3"), "Lean")
+GSE155960_merged$Condition <- replace(GSE155960_merged$Condition, GSE155960_merged$Condition %in% c("O_1","O_2","O_3"), "Healthy Obese")
+```
+
+```{r}
+head(GSE155960_merged)
+```
+
+
+```{r}
+saveRDS(GSE155960_merged,file="GSE155960_merged.RDS")
+```
+

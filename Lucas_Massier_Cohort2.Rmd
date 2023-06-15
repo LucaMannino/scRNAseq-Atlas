@@ -1,0 +1,360 @@
+---
+title: "Lucas_Massier_Cohort2"
+output: html_notebook
+---
+```{r}
+set.seed(001)
+```
+
+```{r, results='hide'}
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(DoubletFinder)
+```
+
+```{r}
+setwd("//home/lucamannino/R_Projects/scAtlas/Individual_Studies/LucasMassier")
+```
+
+
+```{r, results='hide'}
+# Load the PBMC dataset
+Patient21L005043 <- Read10X(data.dir = "./21L005043/")
+Patient21L005043
+# Initialize the Seurat object with the raw (non-normalized data).
+Patient21L005043 <- CreateSeuratObject(counts = Patient21L005043, project = "Patient21L005043", min.cells = 3, min.features = 200)
+Patient21L005043
+```
+36601 genes 4606 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+25861 features across 4606 samples within 1 assay 
+
+
+```{r, results='hide'}
+# Load the PBMC dataset
+Patient21L005039 <- Read10X(data.dir = "./21L005039/")
+Patient21L005039
+# Initialize the Seurat object with the raw (non-normalized data).
+Patient21L005039 <- CreateSeuratObject(counts = Patient21L005039, project = "Patient21L005039", min.cells = 3, min.features = 200)
+Patient21L005039
+```
+36601 genes  1829 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+21958 features across 1829  samples within 1 assay 
+
+
+
+
+
+
+```{r}
+GSE225700 <- c(Patient21L005039,Patient21L005043)
+names(GSE225700) <- c("Patient21L005039","Patient21L005043")
+```
+
+```{r}
+
+
+GSE225700$Patient21L005039[["mt.percent"]] <-PercentageFeatureSet(GSE225700$Patient21L005039, pattern = "^MT-")
+GSE225700$Patient21L005043[["mt.percent"]] <-PercentageFeatureSet(GSE225700$Patient21L005043, pattern = "^MT-")
+
+
+
+
+
+```
+```{r}
+lapply(GSE225700, function(x)  {VlnPlot(x, features = c("nFeature_RNA", "nCount_RNA", "mt.percent"), ncol = 3)})
+```
+2 single cell 2 single nuclei?
+
+```{r}
+
+
+
+
+
+max.mito.thr_Patient21L005039 <- median(GSE225700$Patient21L005039@meta.data$mt.percent) + 4*mad(GSE225700$Patient21L005039@meta.data$mt.percent)
+max.mito.thr_Patient21L005043 <- median(GSE225700$Patient21L005043@meta.data$mt.percent) + 4*mad(GSE225700$Patient21L005043@meta.data$mt.percent)
+
+
+
+
+max.mito.thr_Patient21L005039
+max.mito.thr_Patient21L005043
+
+
+#For Single nuclei wont be using MT cutoff as dying cells shouldn't be noticeable by MT percentage
+```
+
+
+
+
+```{r}
+library(ggExtra)
+library(ggplot2)
+p2 <- ggplot(GSE225700$Patient21L005039@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_Patient21L005039), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE225700$Sample1@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE225700$Sample1@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p2, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+```{r}
+library(ggExtra)
+library(ggplot2)
+p3 <- ggplot(GSE225700$Patient21L005043@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = max.mito.thr_Patient21L005043), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(GSE225700$Sample1@meta.data$mt.percent > max.mito.thr_SRR12423009)))," cells removed\n",                                        as.numeric(table(GSE225700$Sample1@meta.data$mt.percent > max.mito.thr_SRR12423009)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p3, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+
+
+
+```{r}
+
+lapply(GSE225700, function(x)  {FeatureScatter(x, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")})
+lapply(GSE225700, function(x)  {ggMarginal(ggplot(x@meta.data, aes(x=nFeature_RNA, y=nCount_RNA))+ geom_point() , type = "histogram", fill="lightgrey", bins=100)})
+```
+
+```{r, results='hide'}
+
+GSE225700$Patient21L005039
+GSE225700$Patient21L005043
+
+
+
+```
+
+Patient21L005039:
+21958 features across 1829 samples within 1 assay 
+Active assay: RNA (21958 features, 0 variable features)
+Patient21L005043:
+25861 features across 4606 samples within 1 assay 
+Active assay: RNA (25861 features, 0 variable features)
+
+
+
+```{r}
+
+
+
+GSE225700$Patient21L005039 <- subset(GSE225700$Patient21L005039, subset = nFeature_RNA < 6500  & nCount_RNA < 40000 )
+
+GSE225700$Patient21L005043 <- subset(GSE225700$Patient21L005043, subset = nFeature_RNA < 7500   & nCount_RNA < 40000 )
+
+
+
+
+```
+
+
+
+
+
+
+```{r, results='hide'}
+
+GSE225700$Patient21L005039
+GSE225700$Patient21L005043
+
+
+
+```
+
+
+Patient21L005039
+21958 features across 1820 samples within 1 assay 
+Active assay: RNA (21958 features, 0 variable features)
+Patient21L005043
+25861 features across 4572 samples within 1 assay 
+Active assay: RNA (25861 features, 0 variable features)
+
+
+
+I will keep going with strict version:
+
+
+
+```{r}
+
+lin_mod <- lm(log(GSE225700$Patient21L005039@meta.data$nFeature_RNA) ~ log(GSE225700$Patient21L005039@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE225700$Patient21L005039@meta.data$nCount_RNA),log(GSE225700$Patient21L005039@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE225700$Patient21L005039 <- subset(GSE225700$Patient21L005039, cells = tokeep)
+```
+
+
+```{r}
+
+lin_mod <- lm(log(GSE225700$Patient21L005043@meta.data$nFeature_RNA) ~ log(GSE225700$Patient21L005043@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(GSE225700$Patient21L005043@meta.data$nCount_RNA),log(GSE225700$Patient21L005043@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+GSE225700$Patient21L005043 <- subset(GSE225700$Patient21L005043, cells = tokeep)
+```
+
+
+
+
+
+```{r}
+Patient21L005039DoubletPerc <- 0.008*(1829/1000)
+Patient21L005039DoubletPerc
+```
+DB ratio 0.014632
+
+```{r}
+GSE225700$Patient21L005039 <- GSE225700$Patient21L005039 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE225700$Patient21L005039, ndims = 50)
+
+sweep.res.list_GSE225700Patient21L005039 <- paramSweep_v3(GSE225700$Patient21L005039, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE225700Patient21L005039 <- summarizeSweep(sweep.res.list_GSE225700Patient21L005039, GT = FALSE)
+bcmvn_GSE225700Patient21L005039 <- find.pK(sweep.stats_GSE225700Patient21L005039)
+
+GSE225700$Patient21L005039 <- FindNeighbors(GSE225700$Patient21L005039, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE225700$Patient21L005039))
+GSE225700$Patient21L005039 <- FindClusters(GSE225700$Patient21L005039)
+
+
+homotypic.prop_GSE225700Patient21L005039 <- modelHomotypic(GSE225700$Patient21L005039@meta.data$seurat_clusters)   
+nExp_poi_GSE225700Patient21L005039 <- round(Patient21L005039DoubletPerc*nrow(GSE225700$Patient21L005039@meta.data))
+nExp_poi.adj_GSE225700Patient21L005039 <- round(nExp_poi_GSE225700Patient21L005039*(1-homotypic.prop_GSE225700Patient21L005039))
+
+
+pK_GSE225700Patient21L005039 = as.numeric(as.character(bcmvn_GSE225700Patient21L005039$pK))
+BCmetric_GSE225700Patient21L005039 = bcmvn_GSE225700Patient21L005039$BCmetric
+pK_choose_GSE225700Patient21L005039 = pK_GSE225700Patient21L005039[which(BCmetric_GSE225700Patient21L005039 %in% max(BCmetric_GSE225700Patient21L005039))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE225700Patient21L005039, y = BCmetric_GSE225700Patient21L005039, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE225700Patient21L005039,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE225700Patient21L005039,max(BCmetric_GSE225700Patient21L005039),as.character(pK_choose_GSE225700Patient21L005039),pos = 4,col = "red")
+```
+
+use appropiate pK value as estimated above
+```{r}
+GSE225700$Patient21L005039 <- doubletFinder_v3(GSE225700$Patient21L005039, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE225700Patient21L005039, nExp = nExp_poi.adj_GSE225700Patient21L005039, reuse.pANN = FALSE, sct = FALSE)
+
+#
+```
+```{r}
+GSE225700$Patient21L005039 <- RunUMAP(GSE225700$Patient21L005039, dims = 1:20,reduction = "pca", verbose = FALSE)
+```
+
+```{r}
+DimPlot(GSE225700$Patient21L005039,group.by="DF.classifications_0.25_0.19_24")
+```
+
+
+
+
+```{r}
+GSE225700$Patient21L005039
+GSE225700$Patient21L005039 <- subset(GSE225700$Patient21L005039, subset = DF.classifications_0.25_0.19_24 == "Singlet")
+GSE225700$Patient21L005039 
+```
+From: 21958 features across 1820 samples
+
+to:
+21958 features across 1796 samples 
+
+```{r}
+Patient21L005043DoubletPerc <- 0.008*(4606/1000)
+Patient21L005043DoubletPerc
+```
+DB ratio 0.036848
+
+```{r}
+GSE225700$Patient21L005043 <- GSE225700$Patient21L005043 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(GSE225700$Patient21L005043, ndims = 50)
+
+sweep.res.list_GSE225700Patient21L005043 <- paramSweep_v3(GSE225700$Patient21L005043, PCs = 1:30, sct = FALSE)
+sweep.stats_GSE225700Patient21L005043 <- summarizeSweep(sweep.res.list_GSE225700Patient21L005043, GT = FALSE)
+bcmvn_GSE225700Patient21L005043 <- find.pK(sweep.stats_GSE225700Patient21L005043)
+
+GSE225700$Patient21L005043 <- FindNeighbors(GSE225700$Patient21L005043, dims = 1:30, reduction = "pca", features = VariableFeatures(GSE225700$Patient21L005043))
+GSE225700$Patient21L005043 <- FindClusters(GSE225700$Patient21L005043)
+
+
+homotypic.prop_GSE225700Patient21L005043 <- modelHomotypic(GSE225700$Patient21L005043@meta.data$seurat_clusters)   
+nExp_poi_GSE225700Patient21L005043 <- round(Patient21L005043DoubletPerc*nrow(GSE225700$Patient21L005043@meta.data))
+nExp_poi.adj_GSE225700Patient21L005043 <- round(nExp_poi_GSE225700Patient21L005043*(1-homotypic.prop_GSE225700Patient21L005043))
+
+
+pK_GSE225700Patient21L005043 = as.numeric(as.character(bcmvn_GSE225700Patient21L005043$pK))
+BCmetric_GSE225700Patient21L005043 = bcmvn_GSE225700Patient21L005043$BCmetric
+pK_choose_GSE225700Patient21L005043 = pK_GSE225700Patient21L005043[which(BCmetric_GSE225700Patient21L005043 %in% max(BCmetric_GSE225700Patient21L005043))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_GSE225700Patient21L005043, y = BCmetric_GSE225700Patient21L005043, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_GSE225700Patient21L005043,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_GSE225700Patient21L005043,max(BCmetric_GSE225700Patient21L005043),as.character(pK_choose_GSE225700Patient21L005043),pos = 4,col = "red")
+```
+
+use appropiate pK value as estimated above
+```{r}
+GSE225700$Patient21L005043 <- doubletFinder_v3(GSE225700$Patient21L005043, PCs = 1:30, pN = 0.25, pK = pK_choose_GSE225700Patient21L005043, nExp = nExp_poi.adj_GSE225700Patient21L005043, reuse.pANN = FALSE, sct = FALSE)
+
+#
+```
+```{r}
+GSE225700$Patient21L005043 <- RunUMAP(GSE225700$Patient21L005043, dims = 1:20,reduction = "pca", verbose = FALSE)
+```
+
+```{r}
+DimPlot(GSE225700$Patient21L005043,group.by="DF.classifications_0.25_0.06_153")
+```
+
+
+
+
+```{r}
+GSE225700$Patient21L005043
+GSE225700$Patient21L005043 <- subset(GSE225700$Patient21L005043, subset = DF.classifications_0.25_0.06_153 == "Singlet")
+GSE225700$Patient21L005043 
+```
+from:25861 features across 4572 samples
+to: 25861 features across 4419 samples
+21L005043 is diabetic
+21L005039 healthy obese
+sex:female
+
+
+```{r}
+LucasMassierCohort2 <- merge(GSE225700$Patient21L005043,GSE225700$Patient21L005039)
+```
+
+
+```{r}
+LucasMassierCohort2$sex <- "female"
+LucasMassierCohort2$Condition <- as.character(LucasMassierCohort2$orig.ident)
+LucasMassierCohort2$Condition  <- replace(LucasMassierCohort2$Condition, LucasMassierCohort2$Condition %in% "Patient21L005043", "Healthy Obese")
+LucasMassierCohort2$Condition  <- replace(LucasMassierCohort2$Condition, LucasMassierCohort2$Condition %in% "Patient21L005039", "Diabetic Obese")
+LucasMassierCohort2$technology<- "Chromium-v3 single nuclei"
+LucasMassierCohort2$Study_technology <- "Luca Massier Chromium-v3 single nuclei"
+LucasMassierCohort2$Study <- "Luca Massier"
+LucasMassierCohort2$Nuclei_Cell <- "SingleNuclei"
+```
+
+
+```{r}
+saveRDS(LucasMassierCohort2,"LucasMassierCohort2.RDS")
+```
+
+

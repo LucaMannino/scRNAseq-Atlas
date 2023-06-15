@@ -1,0 +1,156 @@
+---
+title: "New_SCP1903"
+output: html_notebook
+---
+
+
+
+```{r}
+metadata_carey <- read.table(file="/home/lucamannino/R_Projects/New_SAT_Atlas/metadata_SCP1903.tsv",fill =TRUE)
+SCP1903 <- Read10X(data.dir = "/home/lucamannino/R_Projects/New_SAT_Atlas/SCP1903/",gene.column=1)
+# Initialize the Seurat object with the raw (non-normalized data).
+SCP1903
+SCP1903 <- CreateSeuratObject(counts = SCP1903, project = "SCP1903")#, min.cells = 3, min.features = 200, meta.data = NULL)
+SCP1903
+```
+
+
+27202 genes across 35488 cells
+object already filtered and total number of  cells match to the SCP1903 object which visusally matches the paper.
+
+The are still some outliers cells with high amounnnnnnnt of Mt% genes
+these cells will be removed
+
+
+```{r}
+rownames(metadata_carey) <- metadata_carey$V1
+```
+
+```{r}
+SCP1903<- AddMetaData(SCP1903, metadata_carey)
+
+```
+We are only interested in subcutaneous adipose tissue
+```{r}
+SCP1903<- subset(SCP1903,  V3 %in% c("6_sat", "2_sat", "3_sat", "1_sat", "4_sat"))
+```
+
+```{r}
+head(SCP1903)
+```
+
+
+```{r}
+SCP1903@meta.data$Study <- "SCP1903"
+```
+
+```{r}
+SCP1903$V9 <-replace(SCP1903$V9, SCP1903$V4 == c( "6"), "Female")
+SCP1903$V9 <-replace(SCP1903$V9, SCP1903$V4 == c( "1"), "Female")
+SCP1903$V9 <-replace(SCP1903$V9, SCP1903$V4 == "2", "Male")
+SCP1903$V9 <-replace(SCP1903$V9, SCP1903$V4 == "3", "Female")
+SCP1903$V9 <-replace(SCP1903$V9, SCP1903$V4 == "4", "Male")
+```
+```{r}
+SCP1903@meta.data$orig.ident <- SCP1903@meta.data$V3
+```
+```{r}
+SCP1903$V21 <-replace(SCP1903$V21, SCP1903$V4 == c( "6"), "Unhealthy")
+SCP1903$V21 <-replace(SCP1903$V21, SCP1903$V4 == c( "1"), "Unhealthy")
+SCP1903$V21 <-replace(SCP1903$V21, SCP1903$V4 == "2", "Healthy")
+SCP1903$V21 <-replace(SCP1903$V21, SCP1903$V4 == "3", "Healthy")
+SCP1903$V21 <-replace(SCP1903$V21, SCP1903$V4 == "4", "Healthy")
+SCP1903$V21 <-replace(SCP1903$V21, SCP1903$V4 == "5", "Healthy")
+```
+
+```{r}
+SCP1903$V1 <-NULL
+SCP1903$V5 <-NULL
+SCP1903$V6 <-NULL
+SCP1903$V7 <-NULL
+SCP1903$V8 <-NULL
+
+SCP1903$V10 <-NULL
+SCP1903$V11 <-NULL
+SCP1903$V12 <-NULL
+SCP1903$V14 <-NULL
+SCP1903$V16 <-NULL
+SCP1903$V15 <-NULL
+SCP1903$V17 <-NULL
+SCP1903$V18 <-NULL
+SCP1903$V19 <-NULL
+SCP1903$V20 <-NULL
+SCP1903$V23 <-NULL
+SCP1903$V24 <-NULL
+```
+
+```{r}
+head(SCP1903)
+```
+```{r}
+SCP1903$V2 <-NULL
+SCP1903$V3 <-NULL
+SCP1903$V4 <-NULL
+SCP1903$V13 <-NULL
+```
+
+```{r}
+colnames(SCP1903@meta.data)[4]  <- "sex"
+```
+
+```{r}
+SCP1903@meta.data$Condition[SCP1903@meta.data$orig.ident=="6_sat"] <-  "Unhealthy Obese"
+SCP1903@meta.data$Condition[SCP1903@meta.data$orig.ident=="2_sat"] <-  "Lean"
+SCP1903@meta.data$Condition[SCP1903@meta.data$orig.ident=="4_sat"] <-  "Lean"
+SCP1903@meta.data$Condition[SCP1903@meta.data$orig.ident=="3_sat"] <-  "Healthy Obese"
+SCP1903@meta.data$Condition[SCP1903@meta.data$orig.ident=="1_sat"] <-  "Unhealthy Obese"
+
+```
+```{r}
+SCP1903$V21 <-NULL
+SCP1903$V22 <-NULL
+```
+
+```{r}
+SCP1903@meta.data$technology <- "Chromium-v3 single nuclei"
+```
+
+```{r}
+SCP1903[["mt.percent"]] <-PercentageFeatureSet(SCP1903, pattern = "^MT-")
+
+```
+
+```{r}
+VlnPlot(SCP1903, features = c("nFeature_RNA", "nCount_RNA", "mt.percent"), ,ncol = 3)
+```
+
+```{r}
+
+SCP1903
+```
+27202 genes across 7132 cells
+
+```{r}
+SCP1903_Filtered <- subset(SCP1903, subset = mt.percent < 5  )
+SCP1903_Filtered
+```
+
+Final Object
+27202 genes across 7126 cells
+
+```{r}
+saveRDS(SCP1903_Filtered, file="New_SCP1903.RDS")
+```
+
+
+```{r}
+head(SCP1903_Filtered)
+
+```
+
+
+```{r}
+library(data.table)
+any(rownames(SCP1903) %like% 'PECAM1')
+```
+

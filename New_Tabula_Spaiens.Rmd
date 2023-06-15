@@ -1,0 +1,351 @@
+---
+title: "New_Tabula_Spaiens"
+output: html_notebook
+---
+
+
+
+#Tbula Sapiens Raw data downloaded from AWS
+```{r}
+set.seed(001)
+```
+
+```{r, results='hide'}
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(DoubletFinder)
+```
+```{r}
+setwd("/home/lucamannino/R_Projects/scAtlas/Individual_Studies/Tabula_Sapiens")
+```
+
+```{r, results='hide'}
+# Load the PBMC dataset
+TSP10 <- Read10X(data.dir = "./TSP10/")
+TSP10
+# Initialize the Seurat object with the raw (non-normalized data).
+TSP10 <- CreateSeuratObject(counts = TSP10, project = "TSP10", min.cells = 3, min.features = 200)
+TSP10
+```
+10983 samples with 58870 genes obtained from cell ranger
+After removing cell with less than 200 gene counts:
+28171 features across 10981 samples within 1 assay 
+
+
+
+```{r, results='hide'}
+TSP14 <- Read10X(data.dir = "./TSP14/")
+# Initialize the Seurat object with the raw (non-normalized data).
+TSP14
+TSP14 <- CreateSeuratObject(counts = TSP14, project = "TSP14", min.cells = 3, min.features = 200)
+TSP14
+```
+58857 genes with 6794805 samples obtained from cell ranger
+After removing cell with less than 200 gene counts and removing genes expressed in less than 3 cells:
+26890 features across 8278 samples within 1 assay 
+
+
+
+
+
+
+```{r}
+TabulaSapiens <- c(TSP10,TSP14)
+names(TabulaSapiens) <- c("TSP10","TSP14")
+```
+
+```{r}
+
+TabulaSapiens$TSP10[["mt.percent"]] <-PercentageFeatureSet(TabulaSapiens$TSP10, pattern = "^MT-")
+TabulaSapiens$TSP14[["mt.percent"]] <-PercentageFeatureSet(TabulaSapiens$TSP14, pattern = "^MT-")
+
+
+
+
+```
+```{r}
+lapply(TabulaSapiens, function(x)  {VlnPlot(x, features = c("nFeature_RNA", "nCount_RNA", "mt.percent"), ncol = 3)})
+```
+
+
+```{r}
+
+
+
+
+max.mito.thr_TSP10 <- median(TabulaSapiens$TSP10@meta.data$mt.percent) + 4*mad(TabulaSapiens$TSP10@meta.data$mt.percent)
+max.mito.thr_TSP14 <- median(TabulaSapiens$TSP14@meta.data$mt.percent) + 4*mad(TabulaSapiens$TSP14@meta.data$mt.percent)
+max.mito.thr_TSP10
+max.mito.thr_TSP14
+```
+#the mitochondria percentages are way too high will need a stricter amount
+
+
+```{r}
+library(ggExtra)
+library(ggplot2)
+p1 <- ggplot(TabulaSapiens$TSP10@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = 20), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(TabulaSapiens$TSP10@meta.data$mt.percent > max.mito.thr_TSP10)))," cells removed\n",                                        as.numeric(table(TabulaSapiens$TSP10@meta.data$mt.percent > max.mito.thr_TSP10)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p1, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+```{r}
+p2 <- ggplot(TabulaSapiens$TSP14@meta.data, aes(x=nFeature_RNA, y=mt.percent)) +
+      geom_point() +
+      geom_hline(aes(yintercept = 20), colour = "red", linetype = 2) #+
+#      annotate(geom = "text", label = paste0(as.numeric(table(TabulaSapiens$TSP10@meta.data$mt.percent > max.mito.thr_TSP10)))," cells removed\n",                                        as.numeric(table(TabulaSapiens$TSP10@meta.data$mt.percent > max.mito.thr_TSP10)," cells remain"), x = 6000, y = 0.1)
+
+ggMarginal(p2, type = "histogram", fill="lightgrey", bins=100) 
+```
+
+
+```{r}
+
+lapply(TabulaSapiens, function(x)  {FeatureScatter(x, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")})
+lapply(TabulaSapiens, function(x)  {ggMarginal(ggplot(x@meta.data, aes(x=nFeature_RNA, y=nCount_RNA))+ geom_point() , type = "histogram", fill="lightgrey", bins=100)})
+```
+similar threshold was chosen for all samples
+
+```{r}
+TabulaSapiens$TSP10
+TabulaSapiens$TSP10 <- subset(TabulaSapiens$TSP10, subset = nFeature_RNA < 7500 & mt.percent < 20  & nCount_RNA < 50000 )
+TabulaSapiens$TSP14
+TabulaSapiens$TSP14 <- subset(TabulaSapiens$TSP14, subset = nFeature_RNA < 7500 & mt.percent < 20  & nCount_RNA < 50000 )
+
+
+```
+
+```{r, results='hide'}
+TabulaSapiens$TSP10
+TabulaSapiens$TSP14
+
+
+```
+
+TSP10 from:28171 features across 10981 samples to: 28171 features across 6628 samples
+TSP14 from 26890 features across 8278 samples to: 26890 features across 5032 samples
+
+
+
+
+
+
+```{r}
+
+lin_mod <- lm(log(TabulaSapiens$TSP10@meta.data$nFeature_RNA) ~ log(TabulaSapiens$TSP10@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(TabulaSapiens$TSP10@meta.data$nCount_RNA),log(TabulaSapiens$TSP10@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+TabulaSapiens$TSP10 <- subset(TabulaSapiens$TSP10, cells = tokeep)
+```
+```{r}
+lin_mod <- lm(log(TabulaSapiens$TSP14@meta.data$nFeature_RNA) ~ log(TabulaSapiens$TSP14@meta.data$nCount_RNA))
+sub <- lin_mod$model[lin_mod$residuals < -0.5,]
+plot(log(TabulaSapiens$TSP14@meta.data$nCount_RNA),log(TabulaSapiens$TSP14@meta.data$nFeature_RNA), xlab ="log(nCount_RNA)",ylab="log(nFeature_RNA)",pch=20,col="grey") +
+abline(lin_mod,col="red",lwd=3) +
+points(sub[,2], sub[,1],pch=20,col="blue")
+tokeep <- as.numeric(names(lin_mod$residuals[lin_mod$residuals >= -0.5]))
+TabulaSapiens$TSP14 <- subset(TabulaSapiens$TSP14, cells = tokeep)
+```
+
+
+```{r, results='hide'}
+TabulaSapiens$TSP10
+TabulaSapiens$TSP14
+
+```
+
+TSP10 28171 features across 6612 samples
+TSP14 26890 features across 4992 samples 
+
+
+
+
+Nest step remove doublets with doublet finder
+estimated the number of doublets by multiplying the number of total cells sequenced by 0.08 per 1000 cells
+First step is estimate percentage of doublets:
+```{r}
+TSP10DoubletPerc <- 0.008*(10981/1000)
+TSP10DoubletPerc
+```
+DB proportion:0.087848
+
+```{r}
+TabulaSapiens$TSP10 <- TabulaSapiens$TSP10 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(TabulaSapiens$TSP10, ndims = 50)
+
+sweep.res.list_TabulaSapiensTSP10 <- paramSweep_v3(TabulaSapiens$TSP10, PCs = 1:30, sct = FALSE)
+sweep.stats_TabulaSapiensTSP10 <- summarizeSweep(sweep.res.list_TabulaSapiensTSP10, GT = FALSE)
+bcmvn_TabulaSapiensTSP10 <- find.pK(sweep.stats_TabulaSapiensTSP10)
+
+TabulaSapiens$TSP10 <- FindNeighbors(TabulaSapiens$TSP10, dims = 1:30, reduction = "pca", features = VariableFeatures(TabulaSapiens$TSP10))
+TabulaSapiens$TSP10 <- FindClusters(TabulaSapiens$TSP10)
+
+
+homotypic.prop_TabulaSapiensTSP10 <- modelHomotypic(TabulaSapiens$TSP10@meta.data$seurat_clusters)   
+nExp_poi_TabulaSapiensTSP10 <- round(TSP10DoubletPerc*nrow(TabulaSapiens$TSP10@meta.data))
+nExp_poi.adj_TabulaSapiensTSP10 <- round(nExp_poi_TabulaSapiensTSP10*(1-homotypic.prop_TabulaSapiensTSP10))
+
+
+pK_TabulaSapiensTSP10 = as.numeric(as.character(bcmvn_TabulaSapiensTSP10$pK))
+BCmetric_TabulaSapiensTSP10 = bcmvn_TabulaSapiensTSP10$BCmetric
+pK_choose_TabulaSapiensTSP10 = pK_TabulaSapiensTSP10[which(BCmetric_TabulaSapiensTSP10 %in% max(BCmetric_TabulaSapiensTSP10))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_TabulaSapiensTSP10, y = BCmetric_TabulaSapiensTSP10, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_TabulaSapiensTSP10,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_TabulaSapiensTSP10,max(BCmetric_TabulaSapiensTSP10),as.character(pK_choose_TabulaSapiensTSP10),pos = 4,col = "red")
+```
+
+use appropiate pK value as estimated above
+```{r}
+TabulaSapiens$TSP10 <- doubletFinder_v3(TabulaSapiens$TSP10, PCs = 1:30, pN = 0.25, pK = pK_choose_TabulaSapiensTSP10, nExp = nExp_poi.adj_TabulaSapiensTSP10, reuse.pANN = FALSE, sct = FALSE)
+
+#
+```
+```{r}
+TabulaSapiens$TSP10 <- RunUMAP(TabulaSapiens$TSP10, dims = 1:20,reduction = "pca", verbose = FALSE)
+```
+
+```{r}
+DimPlot(TabulaSapiens$TSP10,group.by="DF.classifications_0.25_0.07_543")
+```
+
+
+
+
+```{r}
+TabulaSapiens$TSP10
+TabulaSapiens$TSP10 <- subset(TabulaSapiens$TSP10, subset = DF.classifications_0.25_0.07_543 == "Singlet")
+TabulaSapiens$TSP10 
+```
+Old Object:
+28171 features across 6612 samples
+Doublet removed new object:
+28171 features across 6069 samples
+
+```{r}
+TSP14
+TabulaSapiens$TSP14
+```
+
+```{r}
+TSP14Doubletpercentage <- (8278/1000)*0.008
+TSP14Doubletpercentage
+```
+0.066224 doublet proportion
+```{r}
+TabulaSapiens$TSP14 <- TabulaSapiens$TSP14 %>% NormalizeData(normalization.method = "LogNormalize", scale.factor = 10000) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% ScaleData(vars.to.regress = c("nCount_RNA", "nFeature_RNA")) %>% RunPCA(npcs = 100)
+
+ElbowPlot(TabulaSapiens$TSP14, ndims = 50)
+
+sweep.res.list_TabulaSapiensTSP14 <- paramSweep_v3(TabulaSapiens$TSP14, PCs = 1:30, sct = FALSE)
+sweep.stats_TabulaSapiensTSP14 <- summarizeSweep(sweep.res.list_TabulaSapiensTSP14, GT = FALSE)
+bcmvn_TabulaSapiensTSP14 <- find.pK(sweep.stats_TabulaSapiensTSP14)
+
+TabulaSapiens$TSP14 <- FindNeighbors(TabulaSapiens$TSP14, dims = 1:30, reduction = "pca", features = VariableFeatures(TabulaSapiens$TSP14))
+TabulaSapiens$TSP14 <- FindClusters(TabulaSapiens$TSP14)
+
+
+homotypic.prop_TabulaSapiensTSP14 <- modelHomotypic(TabulaSapiens$TSP14@meta.data$seurat_clusters)   
+nExp_poi_TabulaSapiensTSP14 <- round(TSP14Doubletpercentage*nrow(TabulaSapiens$TSP14@meta.data))
+nExp_poi.adj_TabulaSapiensTSP14 <- round(nExp_poi_TabulaSapiensTSP14*(1-homotypic.prop_TabulaSapiensTSP14))
+
+
+pK_TabulaSapiensTSP14 = as.numeric(as.character(bcmvn_TabulaSapiensTSP14$pK))
+BCmetric_TabulaSapiensTSP14 = bcmvn_TabulaSapiensTSP14$BCmetric
+pK_choose_TabulaSapiensTSP14 = pK_TabulaSapiensTSP14[which(BCmetric_TabulaSapiensTSP14 %in% max(BCmetric_TabulaSapiensTSP14))]
+
+par(mar=c(5,4,4,8)+1,cex.main=1.2,font.main=2)
+plot(x = pK_TabulaSapiensTSP14, y = BCmetric_TabulaSapiensTSP14, pch = 16,type="b",
+col = "blue",lty=1)
+abline(v=pK_choose_TabulaSapiensTSP14,lwd=2,col='red',lty=2)
+title("The BCmvn distributions")
+text(pK_choose_TabulaSapiensTSP14,max(BCmetric_TabulaSapiensTSP14),as.character(pK_choose_TabulaSapiensTSP14),pos = 4,col = "red")
+
+TabulaSapiens$TSP14 <- doubletFinder_v3(TabulaSapiens$TSP14, PCs = 1:30, pN = 0.25, pK = pK_choose_TabulaSapiensTSP14, nExp = nExp_poi.adj_TabulaSapiensTSP14, reuse.pANN = FALSE, sct = FALSE)
+```
+```{r}
+TabulaSapiens$TSP14 <- RunUMAP(TabulaSapiens$TSP14,dims = 1:20)
+```
+
+
+```{r}
+DimPlot(TabulaSapiens$TSP14, group.by = "DF.classifications_0.25_0.14_299")
+```
+
+
+```{r}
+#
+TabulaSapiens$TSP14
+TabulaSapiens$TSP14 <- subset(TabulaSapiens$TSP14, subset = DF.classifications_0.25_0.14_299 == "Singlet")
+
+TabulaSapiens$TSP14
+```
+
+Before Doublet Removal
+26890 features across 4992 samples
+After Doublet Removal:
+26890 features across 4693 samples
+
+
+```{r}
+TabulaSapiens$TSP10
+TabulaSapiens$TSP14
+```
+
+
+
+```{r}
+TabulaSapiens$TSP10$Study <- "TabulaSapiens"
+TabulaSapiens$TSP14$Study <- "TabulaSapiens"
+
+```
+```{r}
+TabulaSapiens_merged <- merge(TabulaSapiens$TSP10,TabulaSapiens$TSP14)
+```
+
+```{r}
+head(TabulaSapiens_merged)
+```
+
+
+```{r}
+TabulaSapiens_merged$RNA_snn_res.0.8 <- NULL
+TabulaSapiens_merged$seurat_clusters <- NULL
+TabulaSapiens_merged$pANN_0.25_0.07_543 <- NULL
+TabulaSapiens_merged$DF.classifications_0.25_0.07_543 <- NULL
+TabulaSapiens_merged$pANN_0.25_0.14_299 <- NULL
+TabulaSapiens_merged$DF.classifications_0.25_0.14_299 <- NULL
+
+
+TabulaSapiens_merged$Study <- "TabulaSapiens"
+TabulaSapiens_merged$technology <- "Chromium-v3 single cell"
+TabulaSapiens_merged$sex <- "male"
+```
+
+10 = healthy obese
+14 = Lean
+```{r}
+TabulaSapiens_merged$Condition<-as.character(TabulaSapiens_merged$orig.ident)
+
+TabulaSapiens_merged$Condition <- replace(TabulaSapiens_merged$Condition, TabulaSapiens_merged$Condition %in% "TSP10", "Healthy Obese")
+TabulaSapiens_merged$Condition <- replace(TabulaSapiens_merged$Condition, TabulaSapiens_merged$Condition %in% "TSP14", "Lean")
+```
+
+
+```{r}
+saveRDS(TabulaSapiens_merged,file="New_TabulaSapiens_merged.RDS")
+```
+
+
+
